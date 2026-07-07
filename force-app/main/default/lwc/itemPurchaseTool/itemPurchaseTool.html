@@ -1,5 +1,22 @@
 <template>
   <lightning-card title="Item Purchase Tool">
-    <p class="slds-p-around_medium">Item Purchase Tool is loading...</p>
+    <div class="container">
+      <c-account-header></c-account-header>
+
+      <c-filter-panel
+        onfilterchange={handleFilterChange}
+        onsearch={handleSearch}
+      >
+      </c-filter-panel>
+
+      <c-item-list
+        items={items}
+        onaddtocart={handleAddToCart}
+        ondetails={handleDetails}
+      >
+      </c-item-list>
+
+      <lightning-button label="Cart" onclick={openCart}> </lightning-button>
+    </div>
   </lightning-card>
 </template>
