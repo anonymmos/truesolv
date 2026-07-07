@@ -3,13 +3,13 @@ public with sharing class PurchaseController {
   public static Boolean validateStock(List<PurchaseLine__c> lines) {
     for (PurchaseLine__c line : lines) {
       Item__c item = [
-        SELECT AvailableQuantity__c
+        SELECT Id, AvailableQuantity__c
         FROM Item__c
-        WHERE Id = :line.Item__c
+        WHERE Id = :line.ItemId__c
         LIMIT 1
       ];
 
-      if (item.AvailableQuantity__c < line.Quantity__c) {
+      if (item.AvailableQuantity__c < line.Amount__c) {
         return false;
       }
     }
@@ -25,11 +25,11 @@ public with sharing class PurchaseController {
       Item__c item = [
         SELECT Id, AvailableQuantity__c
         FROM Item__c
-        WHERE Id = :line.Item__c
+        WHERE Id = :line.ItemId__c
         LIMIT 1
       ];
 
-      item.AvailableQuantity__c -= line.Quantity__c;
+      item.AvailableQuantity__c -= line.Amount__c;
 
       items.add(item);
     }
@@ -48,7 +48,7 @@ public with sharing class PurchaseController {
     insert purchase;
 
     for (PurchaseLine__c line : lines) {
-      line.Purchase__c = purchase.Id;
+      line.PurchaseId__c = purchase.Id;
     }
 
     insert lines;

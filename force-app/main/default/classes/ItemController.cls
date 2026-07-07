@@ -47,13 +47,13 @@ public with sharing class ItemController {
   public static List<String> getFamilies() {
     List<String> families = new List<String>();
 
-    for (Item__c item : [
+    for (AggregateResult ar : [
       SELECT Family__c
       FROM Item__c
       WHERE Family__c != NULL
       GROUP BY Family__c
     ]) {
-      families.add(item.Family__c);
+      families.add((String) ar.get('Family__c'));
     }
 
     return families;
@@ -63,13 +63,13 @@ public with sharing class ItemController {
   public static List<String> getTypes() {
     List<String> types = new List<String>();
 
-    for (Item__c item : [
+    for (AggregateResult ar : [
       SELECT Type__c
       FROM Item__c
       WHERE Type__c != NULL
       GROUP BY Type__c
     ]) {
-      types.add(item.Type__c);
+      types.add((String) ar.get('Type__c'));
     }
 
     return types;
