@@ -3,6 +3,8 @@ import { LightningElement, api } from "lwc";
 import getItems from "@salesforce/apex/ItemController.getItems";
 
 export default class ItemPurchaseTool extends LightningElement {
+  @api recordId;
+
   items = [];
 
   cart = [];
@@ -16,7 +18,6 @@ export default class ItemPurchaseTool extends LightningElement {
   connectedCallback() {
     this.loadItems();
     console.log("Account Id:", this.recordId);
-    this.loadItems();
   }
 
   loadItems() {
@@ -61,6 +62,4 @@ export default class ItemPurchaseTool extends LightningElement {
   openCart() {
     console.log("Cart opened", this.cart);
   }
-
-  @api recordId;
 }
