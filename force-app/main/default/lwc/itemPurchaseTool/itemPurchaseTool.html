@@ -1,11 +1,26 @@
 <template>
   <lightning-card title="Item Purchase Tool">
+    <c-account-header record-id={accountId}></c-account-header>
+
+    <template if:true={isManager}>
+      <lightning-button
+        slot="actions"
+        label="Create Item"
+        onclick={handleOpenCreateItem}
+      >
+      </lightning-button>
+    </template>
+
     <c-filter-panel onfilterchange={handleFilterChange} onsearch={handleSearch}>
     </c-filter-panel>
 
     <p class="slds-p-around_small">Items found: {itemCount}</p>
 
-    <lightning-button label="Cart" onclick={openCart}></lightning-button>
+    <lightning-button
+      label={cartCount}
+      icon-name="utility:cart"
+      onclick={openCart}
+    ></lightning-button>
 
     <c-item-list
       items={filteredItems}
@@ -14,4 +29,23 @@
     >
     </c-item-list>
   </lightning-card>
+
+  <template if:true={isDetailsModalOpen}>
+    <c-item-details-modal item={selectedItem} onclose={handleCloseDetails}>
+    </c-item-details-modal>
+  </template>
+
+  <template if:true={isCartModalOpen}>
+    <c-cart-modal
+      cart-items={cart}
+      onclose={handleCloseCart}
+      onremove={handleRemoveFromCart}
+      oncheckout={handleCheckout}
+    >
+    </c-cart-modal>
+  </template>
+
+  <template if:true={isCreateItemModalOpen}>
+    <c-create-item-modal onclose={handleCloseCreateItem}> </c-create-item-modal>
+  </template>
 </template>
