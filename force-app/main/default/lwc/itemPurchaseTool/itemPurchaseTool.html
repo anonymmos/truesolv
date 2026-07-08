@@ -46,6 +46,10 @@
   </template>
 
   <template if:true={isCreateItemModalOpen}>
-    <c-create-item-modal onclose={handleCloseCreateItem}> </c-create-item-modal>
+    <c-create-item-modal
+      onsuccess={handleItemCreated}
+      onclose={handleCloseCreateItem}
+    >
+    </c-create-item-modal>
   </template>
 </template>

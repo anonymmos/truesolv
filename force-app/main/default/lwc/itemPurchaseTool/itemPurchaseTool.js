@@ -188,6 +188,13 @@ export default class ItemPurchaseTool extends NavigationMixin(
     this.isCreateItemModalOpen = false;
   }
 
+  handleItemCreated() {
+    this.isCreateItemModalOpen = false;
+    this.loadItems();
+
+    this.showToast("Success", "Item created successfully", "success");
+  }
+
   showToast(title, message, variant) {
     this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
   }
