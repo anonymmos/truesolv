@@ -37,7 +37,7 @@ public with sharing class PurchaseController {
     update items;
   }
 
-  @AuraEnabled
+  /*@AuraEnabled
   public static Purchase__c checkout(List<PurchaseLine__c> lines) {
     if (!validateStock(lines)) {
       throw new AuraHandledException('Not enough stock');
@@ -56,7 +56,7 @@ public with sharing class PurchaseController {
     decreaseStock(lines);
 
     return purchase;
-  }
+  }*/
 
   @AuraEnabled
   public static Purchase__c checkout(
