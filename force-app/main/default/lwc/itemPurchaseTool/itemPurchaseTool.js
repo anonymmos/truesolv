@@ -15,6 +15,8 @@ export default class ItemPurchaseTool extends LightningElement {
 
   connectedCallback() {
     this.loadItems();
+    console.log("Account Id:", this.recordId);
+    this.loadItems();
   }
 
   loadItems() {
