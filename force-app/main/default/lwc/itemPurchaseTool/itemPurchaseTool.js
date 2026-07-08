@@ -1,4 +1,4 @@
-import { LightningElement } from "lwc";
+import { LightningElement, api } from "lwc";
 
 import getItems from "@salesforce/apex/ItemController.getItems";
 
@@ -59,4 +59,6 @@ export default class ItemPurchaseTool extends LightningElement {
   openCart() {
     console.log("Cart opened", this.cart);
   }
+
+  @api recordId;
 }
