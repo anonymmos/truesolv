@@ -1,1 +1,22 @@
-<template> </template>
+<template>
+  <template if:true={item}>
+    <lightning-card title={item.Name}>
+      <div class="slds-p-around_medium">
+        <img src={item.Image__c} width="150" />
+        <p>{item.Description__c}</p>
+        <p>Price: {item.Price__c}</p>
+        <p>Stock: {item.AvailableQuantity__c}</p>
+
+        <lightning-button
+          label="Details"
+          onclick={handleDetailsClick}
+        ></lightning-button>
+        <lightning-button
+          label="Add"
+          disabled={isDisabled}
+          onclick={handleAddClick}
+        ></lightning-button>
+      </div>
+    </lightning-card>
+  </template>
+</template>

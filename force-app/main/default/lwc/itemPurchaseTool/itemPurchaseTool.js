@@ -1,68 +1,76 @@
 import { LightningElement, wire } from "lwc";
-
 import { CurrentPageReference } from "lightning/navigation";
-
 import getItems from "@salesforce/apex/ItemController.getItems";
 
 export default class ItemPurchaseTool extends LightningElement {
-  //@api recordId;
-
+  accountId;
   items = [];
-
   cart = [];
 
-  selectedFamily;
-
-  selectedType;
-
-  searchText;
-
-  connectedCallback() {
-    this.loadItems();
-    console.log("Account Id:", this.recordId);
-  }
+  selectedFamily = "";
+  selectedType = "";
+  searchText = "";
 
   @wire(CurrentPageReference)
   getStateParameters(currentPageReference) {
     if (currentPageReference) {
       this.accountId = currentPageReference.state.c__accountId;
-
-      console.log("Account Id from URL:", this.accountId);
     }
+  }
+
+  connectedCallback() {
+    this.loadItems();
   }
 
   loadItems() {
     getItems()
       .then((result) => {
-        console.log("Items loaded:", result);
-
         this.items = result;
       })
-
       .catch((error) => {
         console.error("Error loading items", error);
       });
   }
 
+  // Собираем фильтр + поиск в одном месте, чтобы они не перетирали друг друга
+  get filteredItems() {
+    if (!this.items) {
+      return [];
+    }
+
+    const search = (this.searchText || "").toLowerCase();
+
+    return this.items.filter((item) => {
+      const matchesFamily =
+        !this.selectedFamily || item.Family__c === this.selectedFamily;
+      const matchesType =
+        !this.selectedType || item.Type__c === this.selectedType;
+      const matchesSearch =
+        !search ||
+        item.Name.toLowerCase().includes(search) ||
+        (item.Description__c &&
+          item.Description__c.toLowerCase().includes(search));
+
+      return matchesFamily && matchesType && matchesSearch;
+    });
+  }
+
+  get itemCount() {
+    return this.filteredItems.length;
+  }
+
   handleFilterChange(event) {
     this.selectedFamily = event.detail.family;
-
     this.selectedType = event.detail.type;
-
-    console.log("Filter:", this.selectedFamily, this.selectedType);
   }
 
   handleSearch(event) {
     this.searchText = event.detail;
-
-    console.log("Search:", this.searchText);
   }
 
   handleAddToCart(event) {
     const item = event.detail;
-
     this.cart = [...this.cart, item];
-
     console.log("Cart:", this.cart);
   }
 

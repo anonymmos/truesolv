@@ -1,22 +1,17 @@
 <template>
   <lightning-card title="Item Purchase Tool">
-    <div class="container">
-      <c-account-header record-id={accountId}> </c-account-header>
+    <c-filter-panel onfilterchange={handleFilterChange} onsearch={handleSearch}>
+    </c-filter-panel>
 
-      <c-filter-panel
-        onfilterchange={handleFilterChange}
-        onsearch={handleSearch}
-      >
-      </c-filter-panel>
+    <p class="slds-p-around_small">Items found: {itemCount}</p>
 
-      <c-item-list
-        items={items}
-        onaddtocart={handleAddToCart}
-        ondetails={handleDetails}
-      >
-      </c-item-list>
+    <lightning-button label="Cart" onclick={openCart}></lightning-button>
 
-      <lightning-button label="Cart" onclick={openCart}> </lightning-button>
-    </div>
+    <c-item-list
+      items={filteredItems}
+      onaddtocart={handleAddToCart}
+      ondetails={handleDetails}
+    >
+    </c-item-list>
   </lightning-card>
 </template>

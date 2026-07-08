@@ -1,1 +1,14 @@
-<template> </template>
+<template>
+  <lightning-input label="Search" type="search" onchange={handleSearch}>
+  </lightning-input>
+
+  <lightning-combobox
+    label="Family"
+    options={familyOptions}
+    onchange={handleFamily}
+  >
+  </lightning-combobox>
+
+  <lightning-combobox label="Type" options={typeOptions} onchange={handleType}>
+  </lightning-combobox>
+</template>

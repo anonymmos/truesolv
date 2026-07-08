@@ -1,1 +1,14 @@
-<template> </template>
+<template>
+  <template if:true={items}>
+    <div class="slds-grid slds-wrap slds-gutters">
+      <template for:each={items} for:item="item">
+        <div
+          key={item.Id}
+          class="slds-col slds-size_1-of-3 slds-p-around_small"
+        >
+          <c-item-tile item={item}></c-item-tile>
+        </div>
+      </template>
+    </div>
+  </template>
+</template>
