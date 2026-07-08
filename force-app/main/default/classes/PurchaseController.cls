@@ -57,4 +57,28 @@ public with sharing class PurchaseController {
 
     return purchase;
   }
+
+  @AuraEnabled
+  public static Purchase__c checkout(
+    String accountId,
+    List<PurchaseLine__c> lines
+  ) {
+    if (!validateStock(lines)) {
+      throw new AuraHandledException('Not enough stock');
+    }
+
+    Purchase__c purchase = new Purchase__c(ClientId__c = accountId);
+
+    insert purchase;
+
+    for (PurchaseLine__c line : lines) {
+      line.PurchaseId__c = purchase.Id;
+    }
+
+    insert lines;
+
+    decreaseStock(lines);
+
+    return purchase;
+  }
 }
