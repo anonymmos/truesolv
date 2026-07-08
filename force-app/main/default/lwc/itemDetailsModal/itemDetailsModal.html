@@ -1,1 +1,48 @@
-<template> </template>
+<template>
+  <template lwc:if={item}>
+    <section class="slds-modal slds-fade-in-open" role="dialog">
+      <div class="slds-modal__container">
+        <header class="slds-modal__header">
+          <lightning-button-icon
+            icon-name="utility:close"
+            class="slds-modal__close"
+            onclick={handleClose}
+            alternative-text="Close"
+          >
+          </lightning-button-icon>
+
+          <h2 class="slds-text-heading_medium">{item.Name}</h2>
+        </header>
+
+        <div class="slds-modal__content slds-p-around_medium">
+          <img src={item.Image__c} width="250" />
+
+          <lightning-record-view-form
+            record-id={item.Id}
+            object-api-name="Item__c"
+          >
+            <lightning-output-field
+              field-name="Description__c"
+            ></lightning-output-field>
+            <lightning-output-field
+              field-name="Price__c"
+            ></lightning-output-field>
+            <lightning-output-field
+              field-name="Family__c"
+            ></lightning-output-field>
+            <lightning-output-field
+              field-name="Type__c"
+            ></lightning-output-field>
+          </lightning-record-view-form>
+        </div>
+
+        <footer class="slds-modal__footer">
+          <lightning-button label="Close" onclick={handleClose}>
+          </lightning-button>
+        </footer>
+      </div>
+    </section>
+
+    <div class="slds-backdrop slds-backdrop_open"></div>
+  </template>
+</template>
