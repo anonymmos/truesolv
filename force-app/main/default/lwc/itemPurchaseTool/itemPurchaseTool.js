@@ -1,9 +1,11 @@
-import { LightningElement, api } from "lwc";
+import { LightningElement, wire } from "lwc";
+
+import { CurrentPageReference } from "lightning/navigation";
 
 import getItems from "@salesforce/apex/ItemController.getItems";
 
 export default class ItemPurchaseTool extends LightningElement {
-  @api recordId;
+  //@api recordId;
 
   items = [];
 
@@ -18,6 +20,15 @@ export default class ItemPurchaseTool extends LightningElement {
   connectedCallback() {
     this.loadItems();
     console.log("Account Id:", this.recordId);
+  }
+
+  @wire(CurrentPageReference)
+  getStateParameters(currentPageReference) {
+    if (currentPageReference) {
+      this.accountId = currentPageReference.state.c__accountId;
+
+      console.log("Account Id from URL:", this.accountId);
+    }
   }
 
   loadItems() {
