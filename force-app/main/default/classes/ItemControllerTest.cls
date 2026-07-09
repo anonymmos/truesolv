@@ -8,16 +8,16 @@ private class ItemControllerTest {
         Description__c = 'Fast laptop',
         Price__c = 1000,
         AvailableQuantity__c = 5,
-        Family__c = 'Electronics',
-        Type__c = 'New'
+        Family__c = 'Family 1',
+        Type__c = 'Type 1'
       ),
       new Item__c(
         Name = 'Chair',
         Description__c = 'Office chair',
         Price__c = 100,
         AvailableQuantity__c = 0,
-        Family__c = 'Furniture',
-        Type__c = 'Used'
+        Family__c = 'Family 2',
+        Type__c = 'Type 2'
       )
     };
   }
@@ -57,8 +57,8 @@ private class ItemControllerTest {
       Name = 'Monitor',
       Price__c = 200,
       AvailableQuantity__c = 10,
-      Family__c = 'Electronics',
-      Type__c = 'New'
+      Family__c = 'Family 1',
+      Type__c = 'Type 1'
     );
 
     Test.startTest();
@@ -77,8 +77,8 @@ private class ItemControllerTest {
     List<String> families = ItemController.getFamilies();
     Test.stopTest();
 
-    System.assert(families.contains('Electronics'));
-    System.assert(families.contains('Furniture'));
+    System.assert(families.contains('Family 1'));
+    System.assert(families.contains('Family 2'));
   }
 
   @isTest
@@ -87,7 +87,7 @@ private class ItemControllerTest {
     List<String> types = ItemController.getTypes();
     Test.stopTest();
 
-    System.assert(types.contains('New'));
-    System.assert(types.contains('Used'));
+    System.assert(types.contains('Type 1'));
+    System.assert(types.contains('Type 2'));
   }
 }
