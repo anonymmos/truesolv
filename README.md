@@ -1,58 +1,51 @@
-# Salesforce DX Project
+# Item Purchase Tool
 
-Salesforce DX is a development approach that brings source-driven development, team collaboration, and continuous integration to the Salesforce Platform. Instead of working directly in an org through a web browser, you work with metadata as source files in a local DX project, track changes in version control, and deploy through automated processes.
+A Salesforce Lightning Web Components app for browsing an item catalog and creating purchases against an Account, built as an `itemPurchaseTool` Lightning App Page.
 
-This project template gets you started with the tools and structure you need to build Salesforce applications using source control, scratch orgs, and the Salesforce CLI.
+## What it does
 
-## Prerequisites
+- Displays the Account the purchase is being made for (name, account number, industry).
+- Lists items with search and Family/Type filtering.
+- Lets users view item details, add items to a cart, and check out.
+- Validates stock availability at checkout and decrements it after purchase.
+- Auto-calculates purchase totals (`GrandTotal__c`, `TotalItems__c`) via a trigger whenever purchase lines change.
+- Lets managers (`User.IsManager__c`) create new items, auto-fetching a matching product image from the Unsplash API.
 
-Before you start, make sure you have:
+## Data model
 
-- **Salesforce CLI** - Download from [developer.salesforce.com/tools/salesforcecli](https://developer.salesforce.com/tools/salesforcecli). See [Install Salesforce CLI](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_install_cli.htm) for details.
-- **VS Code with Salesforce Extension Pack** - See [Installation Instructions](https://developer.salesforce.com/docs/platform/sfvscode-extensions/guide/install.html) for details. Includes the Agentforce Vibes extension.
-- **A development org** - Sign up for a free Developer Edition org [here](https://developer.salesforce.com/signup).
-- **Dev Hub enabled** (optional, required to create scratch orgs) - You can enable Dev Hub in your development org under Setup > Dev Hub.  See [Provide Developers Access to Salesforce DX Tools](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_setup_dx_tools.htm).
+| Object              | Purpose                                                                                                       |
+| ------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `Item__c`           | Catalog item — Name, `Description__c`, `Price__c`, `AvailableQuantity__c`, `Family__c`, `Type__c`, `Image__c` |
+| `Purchase__c`       | A checkout — `ClientId__c` (Account), `GrandTotal__c`, `TotalItems__c` (both rollup via trigger)              |
+| `PurchaseLine__c`   | Line item on a purchase — `ItemId__c`, `PurchaseId__c`, `Amount__c`, `UnitCost__c`                            |
+| `User.IsManager__c` | Custom field gating item-creation access                                                                      |
 
-## Project Structure
+## Architecture
 
-Your DX project follows this structure:
+```
+itemPurchaseTool (container: loads items/role, owns cart & filter state)
+├── accountHeader        — Account summary via UI Record API
+├── filterPanel           — search input + Family/Type comboboxes
+├── itemList → itemTile   — catalog grid, add-to-cart / view-details actions
+├── itemDetailsModal      — full item detail view
+├── cartModal             — cart review + checkout
+└── createItemModal       — item creation form (manager-only), Unsplash image lookup
+```
 
-- **`force-app/main/default/`** - Your metadata source files live in this default package directory. You can configure additional package directories in the `sfdx-project.json` file.
-- **`config/`** - Scratch org definitions and project settings
-- **`scripts/`** - Automation scripts for common tasks
-- **`sfdx-project.json`** - Project manifest that defines package directories, namespace, API version, and other project-level settings
+### Apex
 
-See [Salesforce DX Project Configuration](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm).
+| Class                    | Responsibility                                                                          |
+| ------------------------ | --------------------------------------------------------------------------------------- |
+| `ItemController`         | Item CRUD, keyword search, distinct Family/Type lookups                                 |
+| `PurchaseController`     | Stock validation, stock decrement, checkout (creates `Purchase__c` + `PurchaseLine__c`) |
+| `PurchaseTriggerHandler` | Recalculates `Purchase__c` rollups on `PurchaseLine__c` insert/update/delete/undelete   |
+| `UnsplashService`        | Callout to the Unsplash API to fetch a product image by item name                       |
+| `UserController`         | Exposes the current user's manager flag                                                 |
 
-## Get Started
+`PurchaseLineTrigger` on `PurchaseLine__c` delegates to `PurchaseTriggerHandler`.
 
-Ready to start developing? The [Get Started with Salesforce DX](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_get_started_dx.htm) guide walks you through your first project, from creating a scratch org to creating a simple Apex class or LWC to deploying your code to a sandbox.
+## Tests
 
-## Common Salesforce CLI Commands
+Apex test classes cover each controller, the trigger handler (insert/update/delete rollup scenarios), and the Unsplash callout (success, empty-results, and error-response mocks): `ItemControllerTest`, `PurchaseControllerTest`, `PurchaseTriggerTest`, `UnsplashServiceTest`, `UserControllerTest`.
 
-Here are common CLI commands that you'll use the most:
-
-- `sf org login web`: Authorize an org
-- `sf org open`: Open your org in a browser
-- `sf org create scratch`: Create a scratch org
-- `sf project deploy start`: Deploy metadata to your org
-- `sf project retrieve start`: Retrieve metadata from your org
-- `sf template generate <artifact>`: Scaffold new components, such as Apex classes and triggers, LWC components, Lightning apps, and more
-- `sf apex <command>`: Run Apex tests, run anonymous Apex blocks, and view logs
-- `sf data <command>`: Work with test data
-- `sf alias <command>`: Manage org aliases
-- `sf config <command>`: Configure CLI settings
-
-## Use Agentforce Vibes to Build Lightning Apps
-
-Transform your ideas into custom Lightning apps that extend CRM workflows directly in Lightning Experience. Through natural conversations with Agentforce Vibes, implement custom objects and fields, complex business logic, and dynamic UI components. See [Build a Lightning App Using Agentforce Vibes](https://developer.salesforce.com/docs/platform/einstein-for-devs/guide/lexapp-overview.html).
-
-## Additional Resources
-
-- [Agentforce Vibes Developer Guide](https://developer.salesforce.com/docs/platform/einstein-for-devs/guide/einstein-overview.html)
-- [Salesforce CLI Installation Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
-- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/)
-- [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/)
-- [Salesforce CLI Plugin Development Guide](https://developer.salesforce.com/docs/platform/salesforce-cli-plugin/guide/conceptual-overview.html)
-- [Salesforce VS Code Extensions Documentation](https://developer.salesforce.com/tools/vscode/)
-
+All Apex classes/methods and LWC components now carry ApexDoc/JSDoc-style documentation describing behavior, parameters, return values, and side effects (DML/callouts/exceptions).
