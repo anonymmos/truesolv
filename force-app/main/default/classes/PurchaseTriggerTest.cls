@@ -64,10 +64,15 @@ private class PurchaseTriggerTest {
     );
     insert line;
 
-    line.Amount__c = 10;
+    // Обновляем через "чистый" sObject только с Id и изменяемым полем,
+    // чтобы не задевать Master-Detail поля ItemId__c / PurchaseId__c
+    PurchaseLine__c lineToUpdate = new PurchaseLine__c(
+      Id = line.Id,
+      Amount__c = 10
+    );
 
     Test.startTest();
-    update line;
+    update lineToUpdate;
     Test.stopTest();
 
     Purchase__c updated = [
