@@ -11,34 +11,38 @@
         <h2 class="slds-text-heading_medium">Create Item</h2>
       </header>
       <div class="slds-modal__content slds-p-around_medium">
+        <template if:true={isLoadingImage}>
+          <lightning-spinner
+            alternative-text="Fetching image..."
+          ></lightning-spinner>
+        </template>
+
         <lightning-record-edit-form
           object-api-name="Item__c"
+          onsubmit={handleSubmit}
           onsuccess={handleSuccess}
         >
           <lightning-messages></lightning-messages>
 
           <lightning-input-field field-name="Name"></lightning-input-field>
-
           <lightning-input-field
             field-name="Description__c"
           ></lightning-input-field>
-
           <lightning-input-field field-name="Price__c"></lightning-input-field>
-
           <lightning-input-field field-name="Family__c"></lightning-input-field>
-
           <lightning-input-field field-name="Type__c"></lightning-input-field>
-
           <lightning-input-field
             field-name="AvailableQuantity__c"
           ></lightning-input-field>
 
-          <lightning-input-field field-name="Image__c"></lightning-input-field>
-
           <div class="slds-m-top_medium">
-            <lightning-button type="submit" variant="brand" label="Create">
+            <lightning-button
+              type="submit"
+              variant="brand"
+              label="Create"
+              disabled={isLoadingImage}
+            >
             </lightning-button>
-
             <lightning-button
               class="slds-m-left_small"
               label="Cancel"
