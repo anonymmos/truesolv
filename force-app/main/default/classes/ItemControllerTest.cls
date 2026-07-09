@@ -1,5 +1,14 @@
+/**
+ * Test class for ItemController, covering item retrieval, search,
+ * creation, and family/type filter option queries.
+ */
 @isTest
 private class ItemControllerTest {
+  /**
+   * Test data setup: inserts two Item__c records ("Laptop" with stock 5,
+   * "Chair" with stock 0) spanning two distinct Family__c/Type__c values,
+   * shared across all test methods in this class.
+   */
   @TestSetup
   static void setup() {
     insert new List<Item__c>{
@@ -22,6 +31,10 @@ private class ItemControllerTest {
     };
   }
 
+  /**
+   * Scenario: getItems() is called with the two @TestSetup items present.
+   * Expected outcome: both items are returned (asserts a size of 2).
+   */
   @isTest
   static void testGetItems() {
     Test.startTest();
@@ -31,6 +44,11 @@ private class ItemControllerTest {
     System.assertEquals(2, items.size());
   }
 
+  /**
+   * Scenario: searchItems() is called with a keyword ("Laptop") matching an
+   * item's Name field.
+   * Expected outcome: exactly one result is returned and its Name is "Laptop".
+   */
   @isTest
   static void testSearchItemsByName() {
     Test.startTest();
@@ -41,6 +59,11 @@ private class ItemControllerTest {
     System.assertEquals('Laptop', results[0].Name);
   }
 
+  /**
+   * Scenario: searchItems() is called with a keyword ("Office") matching an
+   * item's Description__c field rather than its Name.
+   * Expected outcome: exactly one result is returned and its Name is "Chair".
+   */
   @isTest
   static void testSearchItemsByDescription() {
     Test.startTest();
@@ -51,6 +74,11 @@ private class ItemControllerTest {
     System.assertEquals('Chair', results[0].Name);
   }
 
+  /**
+   * Scenario: createItem() is called with a new, unsaved Item__c ("Monitor").
+   * Expected outcome: the returned record has a populated Id, and a
+   * subsequent query confirms the record was persisted with the correct Name.
+   */
   @isTest
   static void testCreateItem() {
     Item__c newItem = new Item__c(
@@ -71,6 +99,11 @@ private class ItemControllerTest {
     System.assertEquals('Monitor', fromDb.Name);
   }
 
+  /**
+   * Scenario: getFamilies() is called with the two @TestSetup items, each
+   * having a distinct Family__c value.
+   * Expected outcome: the returned list contains both "Family 1" and "Family 2".
+   */
   @isTest
   static void testGetFamilies() {
     Test.startTest();
@@ -81,6 +114,11 @@ private class ItemControllerTest {
     System.assert(families.contains('Family 2'));
   }
 
+  /**
+   * Scenario: getTypes() is called with the two @TestSetup items, each
+   * having a distinct Type__c value.
+   * Expected outcome: the returned list contains both "Type 1" and "Type 2".
+   */
   @isTest
   static void testGetTypes() {
     Test.startTest();

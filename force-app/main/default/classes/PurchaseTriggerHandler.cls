@@ -1,4 +1,26 @@
+/**
+ * Trigger handler for PurchaseLine__c that keeps the parent Purchase__c's
+ * rollup fields (GrandTotal__c, TotalItems__c) in sync. Invoked by
+ * PurchaseLineTrigger on insert, update, delete, and undelete.
+ */
 public class PurchaseTriggerHandler {
+  /**
+   * Recalculates and updates GrandTotal__c and TotalItems__c on every
+   * Purchase__c referenced by the given trigger line records, based on the
+   * current set of PurchaseLine__c rows for each purchase (re-queried fresh,
+   * not derived solely from newList/oldList).
+   *
+   * @param newList List<PurchaseLine__c> Trigger.new; the changed/inserted lines
+   *   (used to determine affected PurchaseId__c values when isDelete is false).
+   * @param oldList List<PurchaseLine__c> Trigger.old; the prior-state lines
+   *   (used to determine affected PurchaseId__c values when isDelete is true).
+   * @param isDelete Boolean true for a delete trigger context (uses oldList to
+   *   gather affected purchase Ids), false otherwise (uses newList).
+   * No return value.
+   * Side effects: queries PurchaseLine__c and Purchase__c, then performs a
+   *   single bulk DML update on the affected Purchase__c records. No-op (returns
+   *   early) if no purchase Ids are found.
+   */
   public static void updatePurchases(
     List<PurchaseLine__c> newList,
     List<PurchaseLine__c> oldList,
@@ -11,7 +33,7 @@ public class PurchaseTriggerHandler {
       for (PurchaseLine__c line : newList) {
         purchaseIds.add(line.PurchaseId__c);
       }
-    } // DELETE
+    }  // DELETE
     else {
       for (PurchaseLine__c line : oldList) {
         purchaseIds.add(line.PurchaseId__c);

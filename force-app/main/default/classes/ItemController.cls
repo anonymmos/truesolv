@@ -1,4 +1,14 @@
+/**
+ * Controller exposing CRUD and query operations on Item__c records
+ * for the Item Purchase Tool Lightning Web Components.
+ */
 public with sharing class ItemController {
+  /**
+   * Retrieves all Item__c records with the fields needed for catalog display.
+   *
+   * @return List<Item__c> all items ordered by Name; empty list if none exist.
+   *   No parameters. No DML or callouts performed.
+   */
   @AuraEnabled(cacheable=true)
   public static List<Item__c> getItems() {
     return [
@@ -16,6 +26,14 @@ public with sharing class ItemController {
     ];
   }
 
+  /**
+   * Searches Item__c records whose Name or Description__c contains the given keyword.
+   *
+   * @param keyword String search term to match (case-insensitive substring match
+   *   via SOQL LIKE); wrapped internally as '%keyword%'.
+   * @return List<Item__c> matching items ordered by Name; empty list if none match.
+   *   No DML or callouts performed.
+   */
   @AuraEnabled(cacheable=true)
   public static List<Item__c> searchItems(String keyword) {
     String searchValue = '%' + keyword + '%';
@@ -36,6 +54,15 @@ public with sharing class ItemController {
     ];
   }
 
+  /**
+   * Inserts a new Item__c record.
+   *
+   * @param item Item__c the item to create (fields populated by the caller,
+   *   e.g. Name, Price__c, AvailableQuantity__c, Family__c, Type__c, Image__c).
+   * @return Item__c the same item instance, populated with its new Id after insert.
+   * Side effects: performs a DML insert on Item__c. Throws a DmlException if the
+   *   insert violates validation rules or required-field constraints.
+   */
   @AuraEnabled
   public static Item__c createItem(Item__c item) {
     insert item;
@@ -43,6 +70,13 @@ public with sharing class ItemController {
     return item;
   }
 
+  /**
+   * Retrieves the distinct, non-null Family__c values across all Item__c records,
+   * for use as filter options.
+   *
+   * @return List<String> distinct family values (unordered, as grouped by SOQL).
+   *   No parameters. No DML or callouts performed.
+   */
   @AuraEnabled(cacheable=true)
   public static List<String> getFamilies() {
     List<String> families = new List<String>();
@@ -59,6 +93,13 @@ public with sharing class ItemController {
     return families;
   }
 
+  /**
+   * Retrieves the distinct, non-null Type__c values across all Item__c records,
+   * for use as filter options.
+   *
+   * @return List<String> distinct type values (unordered, as grouped by SOQL).
+   *   No parameters. No DML or callouts performed.
+   */
   @AuraEnabled(cacheable=true)
   public static List<String> getTypes() {
     List<String> types = new List<String>();

@@ -1,6 +1,22 @@
+/**
+ * Service class for retrieving a representative image from the Unsplash API,
+ * used to auto-populate an Item__c's Image__c field on creation.
+ */
 public with sharing class UnsplashService {
   private static final String ACCESS_KEY = 'Rbr0KOAfvEt27fn3-UG7vczdkdDW9OQLoWit4e4d4e8';
 
+  /**
+   * Searches Unsplash for a single photo matching the given item name and
+   * returns its "regular" size image URL.
+   *
+   * @param itemName String search query (e.g. an item's Name), URL-encoded
+   *   internally before being sent to the Unsplash API.
+   * @return String the matching photo's regular-size image URL, or null if the
+   *   HTTP response status is not 200 or no results are returned.
+   * Side effects: performs an outbound HTTP callout to api.unsplash.com. Requires
+   *   a corresponding remote site setting / named credential authorization for
+   *   the callout to succeed.
+   */
   @AuraEnabled
   public static String searchImage(String itemName) {
     Http http = new Http();

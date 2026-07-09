@@ -5,11 +5,20 @@ import getItems from "@salesforce/apex/ItemController.getItems";
 import checkout from "@salesforce/apex/PurchaseController.checkout";
 import isCurrentUserManager from "@salesforce/apex/UserController.isCurrentUserManager";
 
+/**
+ * Root component for the Item Purchase Tool: loads the item catalog and
+ * current user's manager status, applies search/filter criteria, manages the
+ * shopping cart, and drives the details/cart/create-item modals through to
+ * checkout.
+ */
 export default class ItemPurchaseTool extends NavigationMixin(
   LightningElement
 ) {
+  /** @type {string} Id of the Account this tool is running in the context of, from the page reference state. */
   accountId;
+  /** @type {Array<Object>} full unfiltered list of Item__c records loaded from the server. */
   items = [];
+  /** @type {Array<Object>} cart line entries, each with Id, Name, Price__c, AvailableQuantity__c, amount, and lineTotal. */
   cart = [];
 
   selectedFamily = "";
@@ -22,6 +31,11 @@ export default class ItemPurchaseTool extends NavigationMixin(
 
   isManager = false;
 
+  /**
+   * Wire adapter callback reading the c__accountId state parameter from the
+   * current page reference (e.g. a Visualforce/Community page URL) into accountId.
+   * @param {Object} currentPageReference the current page reference, if available.
+   */
   @wire(CurrentPageReference)
   getStateParameters(currentPageReference) {
     if (currentPageReference) {
@@ -29,11 +43,16 @@ export default class ItemPurchaseTool extends NavigationMixin(
     }
   }
 
+  /** Lifecycle hook: kicks off the initial item catalog and user-role loads. */
   connectedCallback() {
     this.loadItems();
     this.loadUserRole();
   }
 
+  /**
+   * Loads the item catalog from ItemController.getItems into this.items.
+   * Side effects: performs an Apex call; logs to console on failure.
+   */
   loadItems() {
     getItems()
       .then((result) => {
@@ -44,6 +63,11 @@ export default class ItemPurchaseTool extends NavigationMixin(
       });
   }
 
+  /**
+   * Loads the current user's manager flag from UserController.isCurrentUserManager
+   * into this.isManager.
+   * Side effects: performs an Apex call; logs to console on failure.
+   */
   loadUserRole() {
     isCurrentUserManager()
       .then((result) => {
@@ -52,6 +76,10 @@ export default class ItemPurchaseTool extends NavigationMixin(
       .catch((error) => console.error(error));
   }
 
+  /**
+   * @returns {Array<Object>} this.items filtered by selectedFamily, selectedType,
+   *   and a case-insensitive match of searchText against Name/Description__c.
+   */
   get filteredItems() {
     if (!this.items) return [];
 
@@ -72,37 +100,59 @@ export default class ItemPurchaseTool extends NavigationMixin(
     });
   }
 
+  /** @returns {number} count of items matching the current filters/search. */
   get itemCount() {
     return this.filteredItems.length;
   }
 
+  /** @returns {number} number of distinct line entries currently in the cart. */
   get cartCount() {
     return this.cart.length;
   }
 
+  /**
+   * Updates the selected family/type filters from the filter panel.
+   * @param {CustomEvent} event filterchange event; event.detail has family and type.
+   */
   handleFilterChange(event) {
     this.selectedFamily = event.detail.family;
     this.selectedType = event.detail.type;
   }
 
+  /**
+   * Updates the free-text search filter from the filter panel.
+   * @param {CustomEvent} event search event; event.detail is the search text.
+   */
   handleSearch(event) {
     this.searchText = event.detail;
   }
 
   // ---------- Details ----------
 
+  /**
+   * Opens the details modal for the item whose Id was included in the event.
+   * @param {CustomEvent} event details event; event.detail is the item's Id.
+   */
   handleDetails(event) {
     const itemId = event.detail;
     this.selectedItem = this.items.find((i) => i.Id === itemId);
     this.isDetailsModalOpen = true;
   }
 
+  /** Closes the item details modal. No parameters/return value. */
   handleCloseDetails() {
     this.isDetailsModalOpen = false;
   }
 
   // ---------- Cart ----------
 
+  /**
+   * Adds the given item to the cart, or increments its quantity by 1 if
+   * already present. Rejects the increment (with an error toast) if it would
+   * exceed the item's AvailableQuantity__c.
+   * @param {CustomEvent} event addtocart event; event.detail is the Item__c record.
+   * Side effects: mutates this.cart; shows a success or error toast.
+   */
   handleAddToCart(event) {
     const item = event.detail;
     const existingLine = this.cart.find((line) => line.Id === item.Id);
@@ -132,18 +182,33 @@ export default class ItemPurchaseTool extends NavigationMixin(
     this.showToast("Success", `${item.Name} added to cart`, "success");
   }
 
+  /**
+   * Removes the cart line matching the given item Id.
+   * @param {CustomEvent} event remove event; event.detail is the item's Id to remove.
+   */
   handleRemoveFromCart(event) {
     this.cart = this.cart.filter((line) => line.Id !== event.detail);
   }
 
+  /** Opens the cart modal. No parameters/return value. */
   openCart() {
     this.isCartModalOpen = true;
   }
 
+  /** Closes the cart modal. No parameters/return value. */
   handleCloseCart() {
     this.isCartModalOpen = false;
   }
 
+  /**
+   * Submits the current cart as a purchase via PurchaseController.checkout,
+   * then clears the cart, closes the cart modal, refreshes the item list, and
+   * navigates to the newly created Purchase__c record.
+   * No parameters.
+   * Side effects: performs an Apex callout/DML (via checkout); on success,
+   *   mutates this.cart/isCartModalOpen, reloads items, shows a success toast,
+   *   and navigates away; on failure, shows an error toast only.
+   */
   handleCheckout() {
     const lines = this.cart.map((line) => ({
       ItemId__c: line.Id,
@@ -178,16 +243,23 @@ export default class ItemPurchaseTool extends NavigationMixin(
 
   // ---------- Create Item ----------
 
+  /** @type {boolean} whether the create-item modal is currently open. */
   isCreateItemModalOpen = false;
 
+  /** Opens the create-item modal. No parameters/return value. */
   handleOpenCreateItem() {
     this.isCreateItemModalOpen = true;
   }
 
+  /** Closes the create-item modal. No parameters/return value. */
   handleCloseCreateItem() {
     this.isCreateItemModalOpen = false;
   }
 
+  /**
+   * Handles successful item creation: closes the create-item modal, reloads
+   * the item catalog, and shows a success toast. No parameters/return value.
+   */
   handleItemCreated() {
     this.isCreateItemModalOpen = false;
     this.loadItems();
@@ -195,6 +267,12 @@ export default class ItemPurchaseTool extends NavigationMixin(
     this.showToast("Success", "Item created successfully", "success");
   }
 
+  /**
+   * Dispatches a ShowToastEvent with the given parameters.
+   * @param {string} title toast title.
+   * @param {string} message toast message body.
+   * @param {string} variant toast variant (e.g. "success", "error").
+   */
   showToast(title, message, variant) {
     this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
   }
